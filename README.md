@@ -1,0 +1,3 @@
+# Looking for optimal hash based signatures...
+
+[looking-for-optimal-OTS.pdf](https://github.com/TomWambsgans/looking-for-optimal-hash-based-signatures/releases/download/doc-latest/looking-for-optimal-OTS.pdf)

@@ -1,0 +1,65 @@
+name: Documentation PDF
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'optimal_ots/**'
+      - '.github/workflows/doc.yml'
+  pull_request:
+    paths:
+      - 'optimal_ots/**'
+      - '.github/workflows/doc.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: doc-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Everything that is not main: compile and check, never publish.
+  check-pdf:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile LaTeX
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: optimal_ots
+          root_file: looking-for-optimal-OTS.tex
+      - name: Fail on an undefined reference or citation
+        run: |
+          test -f optimal_ots/.build/looking-for-optimal-OTS.log
+          ! grep -qE 'Reference .* undefined|Citation .* undefined|multiply defined' optimal_ots/.build/looking-for-optimal-OTS.log
+
+  # main only: compile, check, then publish the PDF as a release asset.
+  build-pdf:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile LaTeX
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: optimal_ots
+          root_file: looking-for-optimal-OTS.tex
+      - name: Fail on an undefined reference or citation
+        run: |
+          test -f optimal_ots/.build/looking-for-optimal-OTS.log
+          ! grep -qE 'Reference .* undefined|Citation .* undefined|multiply defined' optimal_ots/.build/looking-for-optimal-OTS.log
+      - name: Name the artifact
+        run: cp optimal_ots/.build/looking-for-optimal-OTS.pdf looking-for-optimal-OTS.pdf
+      - name: Publish PDF as a release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: doc-latest
+          name: Looking for optimal hash-based signatures
+          body: |
+            Auto-built on every push to `main`.
+          make_latest: false
+          files: looking-for-optimal-OTS.pdf
