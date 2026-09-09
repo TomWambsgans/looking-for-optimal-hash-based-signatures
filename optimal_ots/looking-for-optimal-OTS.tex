@@ -441,4 +441,109 @@ When $C_{\mathrm{keygen}}$ is a positive multiple of five, the bound is attained
 \bibitem[BM94]{BM94} Daniel Bleichenbacher and Ueli~M. Maurer. Directed acyclic graphs, one-way functions and digital signatures. In Yvo Desmedt, editor, \emph{Advances in Cryptology---CRYPTO '94}, volume 839 of \emph{LNCS}, pages 75--82. Springer, 1994. \url{https://crypto.ethz.ch/publications/files/BleMau94.pdf}.
 \bibitem[KKW25]{hypercube} Dmitry Khovratovich, Mikhail Kudinov, and Benedikt Wagner. At the top of the hypercube---better size-time tradeoffs for hash-based signatures. In \emph{Advances in Cryptology---CRYPTO 2025, Part VI}, volume 16005 of \emph{LNCS}, pages 93--123. Springer, 2025. Full version: IACR Cryptology ePrint Archive, Report 2025/889. \url{https://eprint.iacr.org/2025/889}.
 \end{thebibliography}
+
+\clearpage
+\appendix
+\section{Polynomial coding}\label{app:polynomial}
+One 512-bit hash output gives 64 eight-bit pieces by splitting. Treating them as polynomial coefficients instead gives 256 possible evaluations. A signature exposes only a few of these correlated pieces. We add free finite-field arithmetic to the framework and keep the same oracle cost model.
+
+\subsection{One seed generates a column}
+For this annex, fix
+\[
+ \lambda=128,\qquad \roinput=\rooutput=512,\qquad \keybudget=405,\qquad \sigbudget=16640.
+\]
+Messages and nonces each have 256 bits. Sample 64 independent uniform 136-bit seeds $s_j$. Fix a public representation and ordering $\alpha_0,\ldots,\alpha_{255}$ of $\mathbb F_{2^8}$. Hash each seed once to obtain 64 coefficients and fill column $j$ with their polynomial's evaluations:
+\[
+ H(\tau^s_j,s_j)=a_{j,0}\Vert\cdots\Vert a_{j,63},\qquad p_j(X)=\sum_{h=0}^{63}a_{j,h}X^h,\qquad u_{ij}=p_j(\alpha_i).
+\]
+This gives a table of 256 rows and 64 columns, with eight bits per entry. Hash each 512-bit row to a 128-bit digest $t_i$, then authenticate these digests with a complete four-ary Merkle tree of height four. Each parent hashes four ordered 128-bit children and retains 128 bits. Publish the root; store the seeds, table, and tree. Distinct hash locations use distinct tweaks. Key generation costs $64+256+85=405$ units.
+
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=.75cm,annex cell/.style={minimum width=6.5mm,minimum height=4mm,inner sep=1pt,font=\tiny}]
+ \node[diagram label] at (2.75,6.8) {One seed generates one column.\\Two of the eight revealed seeds are shown.};
+ \foreach \pos/\col in {0/1,1/4,2/17,3/26,4/50,5/64} {
+   \ifnum\col=4 \def\revealcol{1}\else\ifnum\col=50 \def\revealcol{1}\else\def\revealcol{0}\fi\fi
+   \ifnum\revealcol=1 \def\seedstyle{sent}\def\polystyle{computed}\def\seededge{active edge}\def\seedcolor{computedcolor}\else\def\seedstyle{unused}\def\polystyle{unused}\def\seededge{unused edge}\def\seedcolor{black!35}\fi
+   \node[\seedstyle] (as-\col) at ({1.1*\pos},5.9) {$s_{\col}$};
+   \node[text=\seedcolor,font=\scriptsize] (ah-\col) at ({1.1*\pos},5.25) {$H$};
+   \node[\polystyle] (ap-\col) at ({1.1*\pos},4.6) {$p_{\col}$};
+   \draw[\seededge] (as-\col)--(ah-\col);
+   \draw[\seededge] (ah-\col)--(ap-\col);
+   \ifnum\revealcol=1 \draw[draw=computedcolor] (ap-\col.east)--({1.1*\pos+.5},4.6)--({1.1*\pos+.5},.4);\fi
+   \foreach \rpos/\row in {0/0,1/7,2/80,3/128,4/193,5/255} {
+     \ifnum\row=7 \def\openrow{1}\else\ifnum\row=80 \def\openrow{1}\else\ifnum\row=193 \def\openrow{1}\else\def\openrow{0}\fi\fi\fi
+     \ifnum\openrow=1 \ifnum\revealcol=1 \def\cellstyle{computed}\else\def\cellstyle{sent}\fi\else\def\cellstyle{unused}\fi
+     \node[\cellstyle,annex cell] (au-\row-\col) at ({1.1*\pos},{3.8-.68*\rpos}) {$u_{\row,\col}$};
+     \ifnum\revealcol=1 \ifnum\openrow=1 \draw[active edge] ({1.1*\pos+.5},{3.8-.68*\rpos})--(au-\row-\col.east);\fi\fi
+   }
+ }
+ \foreach \rpos/\row in {0/0,1/7,2/80,3/128,4/193,5/255} {
+   \ifnum\row=7 \def\openrow{1}\else\ifnum\row=80 \def\openrow{1}\else\ifnum\row=193 \def\openrow{1}\else\def\openrow{0}\fi\fi\fi
+   \ifnum\openrow=1 \def\rowstyle{computed}\def\rowedge{active edge}\def\rowcolor{computedcolor}\else\def\rowstyle{unused}\def\rowedge{unused edge}\def\rowcolor{black!35}\fi
+   \node[diagram label,anchor=east,text=\rowcolor] at (-.55,{3.8-.68*\rpos}) {row \row};
+   \begin{scope}[on background layer]
+     \node[draw=black!15,rounded corners=2pt,inner xsep=4pt,inner ysep=2pt,fit=(au-\row-1)(au-\row-64)] (arow-\row) {};
+   \end{scope}
+   \node[text=\rowcolor,font=\scriptsize] (arh-\row) at (6.7,{3.8-.68*\rpos}) {$H$};
+   \node[\rowstyle] (at-\row) at (7.6,{3.8-.68*\rpos}) {$t_{\row}$};
+   \draw[\rowedge] (arow-\row.east)--(arh-\row);
+   \draw[\rowedge] (arh-\row)--(at-\row);
+ }
+ \node[diagram label] at (7.15,4.85) {Row hashing\\$512\to128$ bits};
+ \node[diagram label,text=computedcolor,font=\small] (atree) at (10.1,2) {Merkle tree\\reconstruction};
+ \node[computed,minimum width=10mm] (apk) at (12.45,2) {$\mathsf{pk}$};
+ \node[diagram label,below=5pt] at (apk.south) {128 bits};
+ \foreach \row in {7,80,193} {\draw[active edge] (at-\row.east)--(atree.west);}
+ \node[sent,minimum width=12mm] (aproof) at (10.1,-.1) {$\pi$};
+ \node[diagram label,below=4pt] at (aproof.south) {56 tree digests\\from the signature};
+ \draw[active edge] (aproof)--(atree);
+ \draw[active edge] (atree)--(apk);
+ \node[diagram label] at (2.75,-.45) {Six representative rows and columns are shown.\\Blue column arrows evaluate the polynomials freely.};
+\end{tikzpicture}
+
+\small With eight revealed seeds, the verifier computes eight entries in each opened row and receives the other 56. Orange values are sent, blue values are reconstructed, and gray values are unused; $\pi$ is the tree proof.
+\end{center}
+
+\paragraph{Why this helps.} The verifier evaluates each revealed polynomial wherever needed, without further oracle queries. Any $k\le64$ distinct evaluations give $8k$ independent constraints on its coefficients, by the Vandermonde rank bound. This is the maximum possible for $k$ eight-bit pieces. Seventeen evaluations give 136 bits of constraints; recovering the whole polynomial by interpolation requires 64. Thus many row positions are available while each signature reveals only a small part of each unrevealed column.
+
+\clearpage
+\subsection{A 50-unit signature}
+A recipe chooses 17 rows $I$, $q$ column seeds $J$, and a tree frontier. Obtain the frontier by expanding $t$ internal positions from the root; it has $1+3t$ positions. Choose 17 of its row-digest positions to reconstruct from opened rows and send the other frontier values as $\pi$. Allow two classes:
+\begin{center}
+\begin{tabular}{lrrrr}
+ & Seeds $q$ & Upper hashes $t$ & Proof digests & Signature bits\\
+\hline
+Class 1 & 7 & 25 & 59 & 16,512\\
+Class 2 & 8 & 24 & 56 & 16,128
+\end{tabular}
+\end{center}
+
+Together these classes give about $2^{115.965}$ recipes; keep the first $2^{115}$ in a fixed public ordering. Use the framework's encoder: hash $m\Vert\eta$ with the reserved tweak, read the first 128 bits, and retry with distinct uniform nonces until the index is below $2^{115}$. Send
+\[
+ \sigma=\bigl(\eta,\ \pi,\ (s_j)_{j\in J},\ (u_{ij})_{i\in I,\ j\notin J}\bigr).
+\]
+The recipe determines field positions and lengths; use tree order for $\pi$, then column order for seeds and row--column order for entries. A seed replaces $17\cdot8=136$ entry bits with 136 seed bits, adding encoding choices without increasing size. For an independently fixed message, signing takes at most 8192 expected queries; aborting after $2^{21}$ trials fails with probability below $2^{-369}$.
+
+The verifier recovers the recipe, expands the seeds, reconstructs and hashes the 17 rows, and combines them with $\pi$ to check the public root. Reject invalid indices or field lengths. Both classes cost
+\[
+ C_{\mathrm{verif}}=\underbrace{1}_{\text{encoding}}+\underbrace{q}_{\text{seed hashes}}+\underbrace{17}_{\text{row hashes}}+\underbrace{t}_{\text{upper-tree hashes}}=\mathbf{50}.
+\]
+Seed calls have 136-bit inputs; row, tree, and encoding calls have 512-bit inputs. Every call returns 512 bits and costs one unit.
+
+\paragraph{Comparison.} Retuning the five earlier families to the same budgets and $2^{115}$-disclosure requirement gives:
+\begin{center}
+\begin{tabular}{lrr}
+Construction & Key-generation units & Verification units\\
+\hline
+Top-of-the-hypercube chains & 405 & 66\\
+Branching chain forest & 404 & 53\\
+Pairwise shared seeds & 371 & 51\\
+Seeds shared by four leaves & 296 & 52\\
+Ordinary bit splitting & 373 & 53\\
+\textbf{Polynomial coding} & \textbf{405} & \textbf{50}
+\end{tabular}
+\end{center}
+The chain instance uses 73 length-four and 18 length-five chains. The forest has 19 groups of four four-chain components, each group with its own root. The seed instances use 28 paired or 32 four-leaf components. Splitting uses ten $16\times16$ groups of 32-bit pieces, each authenticated by a four-ary tree. Their respective local reconstruction costs are $42,47,43,43,49$; the final root hashes cost $23,5,7,8,3$. All respect the common signature cap; the first five use 128-bit seeds.
+
+Polynomial coding beats these concrete retuned constructions. Its local information bound is optimal, but full ROM security remains conjectural and optimality over all graphs or codebooks is open.
 \end{document}
