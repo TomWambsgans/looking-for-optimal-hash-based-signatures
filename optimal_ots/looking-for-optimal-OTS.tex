@@ -1,6 +1,7 @@
 \documentclass[10pt]{article}
 \usepackage[margin=0.75in]{geometry}
-\usepackage{amsmath,amssymb}
+\usepackage{amsmath,amssymb,amsthm}
+\newtheorem{proposition}{Proposition}
 \usepackage{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,fit,backgrounds}
@@ -9,10 +10,10 @@
 \tikzset{value/.style={draw,rounded corners=2pt,minimum width=7mm,minimum height=4.5mm,inner sep=2pt,font=\scriptsize},sent/.style={value,draw=sentcolor,fill=sentcolor!10,double,double distance=.6pt},computed/.style={value,draw=computedcolor,fill=computedcolor!8},unused/.style={value,draw=black!25,text=black!45,fill=black!3},active edge/.style={-{Latex[length=1.5mm]},draw=computedcolor,semithick},unused edge/.style={-{Latex[length=1.5mm]},draw=black!25,dashed},group/.style={draw=black!25,rounded corners=3pt,dashed,inner sep=5pt},diagram label/.style={font=\scriptsize,align=center}}
 \newcommand{\seeddiagram}[1]{%
 \begin{tikzpicture}[x=.95cm,y=.8cm]
- \ifnum#1=2 \def\blocks{1/0,2/3.6}\def\rooty{.2}\def\bottomy{-3.1}\def\rootinputs{12}\def\rootunits{3}\def\remaining{11}\else \def\blocks{1/0}\def\rooty{1}\def\bottomy{-1.6}\def\rootinputs{18}\def\rootunits{5}\def\remaining{17}\fi
+ \ifnum#1=2 \def\blocks{1/0,2/4.3}\def\rooty{0}\def\bottomy{-3.9}\def\rootinputbits{1536}\def\rootunits{3}\def\remaining{11}\else \def\blocks{1/0}\def\rooty{.875}\def\bottomy{-2.1}\def\rootinputbits{2304}\def\rootunits{5}\def\remaining{17}\fi
  \foreach \i in {1,...,4} {
-   \def\gap{0}\ifnum#1=2 \ifnum\i>2 \def\gap{1.6}\fi\fi
-   \pgfmathsetmacro{\rowy}{3.5-\i-\gap}
+   \def\gap{0}\ifnum#1=2 \ifnum\i>2 \def\gap{1.8}\fi\fi
+   \pgfmathsetmacro{\rowy}{4-1.25*\i-\gap}
    \def\ts{computed}\ifnum\i=4 \def\ts{sent}\fi
    \node[\ts] (t-\i) at (6.2,\rowy) {$t_\i$};
    \foreach \j in {1,...,4} {
@@ -28,7 +29,7 @@
  \foreach \b/\offset in \blocks {
    \pgfmathtruncatemacro{\firstrow}{#1*(\b-1)+1}
    \pgfmathtruncatemacro{\lastrow}{#1*\b}
-   \pgfmathsetmacro{\lasty}{3.5-\lastrow-(#1==2 && \b==2 ? 1.6 : 0)}
+   \pgfmathsetmacro{\lasty}{4-1.25*\lastrow-(#1==2 && \b==2 ? 1.8 : 0)}
    \foreach \j in {1,...,4} {
      \def\revealseed{0}
      \ifnum#1=2
@@ -38,31 +39,31 @@
      \fi
      \ifnum\revealseed=1 \def\ss{sent}\def\edgekind{active edge}\def\buscolor{computedcolor}\else \def\ss{unused}\def\edgekind{unused edge}\def\buscolor{black!25}\fi
      \ifnum#1=2 \def\seedlabel{s_{\b\j}}\else \def\seedlabel{s_\j}\fi
-     \node[\ss] (s-\b-\j) at ({1.4*(\j-1)},{4.1-\offset}) {$\seedlabel$};
-     \node[text=\buscolor,inner sep=1pt,font=\scriptsize] (h-\b-\j) at ({1.4*(\j-1)},{3.4-\offset}) {$H_{#1}$};
+     \node[\ss] (s-\b-\j) at ({1.4*(\j-1)},{4.5-\offset}) {$\seedlabel$};
+     \node[text=\buscolor,inner sep=1pt,font=\scriptsize] (h-\b-\j) at ({1.4*(\j-1)},{3.7-\offset}) {$H$};
      \draw[\edgekind] (s-\b-\j)--(h-\b-\j);
-     \draw[draw=\buscolor] (h-\b-\j.east)--({1.4*(\j-1)+.62},{3.4-\offset})--({1.4*(\j-1)+.62},\lasty);
+     \draw[draw=\buscolor] (h-\b-\j.east)--({1.4*(\j-1)+.62},{3.7-\offset})--({1.4*(\j-1)+.62},\lasty);
      \foreach \i in {\firstrow,...,\lastrow} {
-       \def\gap{0}\ifnum#1=2 \ifnum\i>2 \def\gap{1.6}\fi\fi
-       \pgfmathsetmacro{\rowy}{3.5-\i-\gap}
+       \def\gap{0}\ifnum#1=2 \ifnum\i>2 \def\gap{1.8}\fi\fi
+       \pgfmathsetmacro{\rowy}{4-1.25*\i-\gap}
        \fill[\buscolor] ({1.4*(\j-1)+.62},\rowy) circle[radius=.7pt];
        \draw[\edgekind] ({1.4*(\j-1)+.62},\rowy)--(l-\i-\j.east);
      }
    }
  }
  \foreach \i in {1,...,4} {
-   \def\gap{0}\ifnum#1=2 \ifnum\i>2 \def\gap{1.6}\fi\fi
-   \pgfmathsetmacro{\rowy}{3.5-\i-\gap}
+   \def\gap{0}\ifnum#1=2 \ifnum\i>2 \def\gap{1.8}\fi\fi
+   \pgfmathsetmacro{\rowy}{4-1.25*\i-\gap}
    \def\edgekind{active edge}\ifnum\i=4 \def\edgekind{unused edge}\fi
    \foreach \j in {1,...,4} {
-     \draw[\edgekind,rounded corners=2pt] (l-\i-\j.south)--({1.4*(\j-1)},{\rowy-.27-.10*\j})--(5.5,{\rowy-.27-.10*\j})--(t-\i.west);
+     \draw[\edgekind,rounded corners=2pt] (l-\i-\j.south)--({1.4*(\j-1)},{\rowy-.40-.10*\j})--(5.5,{\rowy-.40-.10*\j})--(t-\i.west);
    }
  }
- \node[diagram label] at (6.2,4.1) {Row hashes\\$4n\to n$};
+ \node[diagram label] at (6.2,4.5) {Row hashes\\$512\to128$};
  \node[computed] (g) at (8.3,\rooty) {$g$};
- \node[diagram label,above=4pt] at (g.north) {$4n\to n$\\1 unit};
+ \node[diagram label,above=4pt] at (g.north) {$512\to128$\\1 unit};
  \node[computed,minimum width=12mm] (pk) at (10.8,\rooty) {$\mathsf{pk}$};
- \node[diagram label,right=4pt] at (pk.east) {$\rootinputs n\to n$\\\rootunits\ units};
+ \node[diagram label,right=4pt] at (pk.east) {$\rootinputbits\to128$\\\rootunits\ units};
  \foreach \i in {1,...,4} {\draw[active edge] (t-\i.east)--(g.west);}
  \draw[active edge] (g)--(pk);
  \node[diagram label] (more) at (8.6,\bottomy) {\remaining\ further\\component roots};
@@ -70,14 +71,15 @@
 \end{tikzpicture}%
 }
 \usepackage[hidelinks]{hyperref}
-\newcommand{\roinput}{N_{\mathrm{RO,input}}}
-\newcommand{\rooutput}{N_{\mathrm{RO,output}}}
-\newcommand{\keybudget}{N_{\mathrm{RO,keygen}}^{\max}}
-\newcommand{\gamebudget}{N_{\mathrm{RO,game}}^{\max}}
-\newcommand{\fieldbudget}{N_{\mathrm{frontier}}^{\max}}
+\newcommand{\roinput}{N_{\mathrm{input}}^{\mathrm{RO}}}
+\newcommand{\rooutput}{N_{\mathrm{output}}^{\mathrm{RO}}}
+\newcommand{\keybudget}{N_{\mathrm{keygen}}^{\mathrm{RO},\max}}
+\newcommand{\gamebudget}{N_{\mathrm{game}}^{\mathrm{RO},\max}}
 \newcommand{\sigbudget}{S_{\mathrm{sig}}^{\max}}
-\newcommand{\cutbudget}{N_{\mathrm{cuts}}}
-\newcommand{\grinding}{n_{\mathrm{grinding}}}
+\newcommand{\messagesize}{S_{\mathrm{msg}}}
+\newcommand{\noncesize}{S_{\mathrm{nonce}}}
+\newcommand{\encbits}{N_{\mathrm{enc}}}
+\newcommand{\disclosurecount}{N_{\mathrm{disclosures}}}
 \newcommand{\hashcost}{c_{\mathrm{hash}}}
 \newcommand{\reconstructcost}{C_{\mathrm{reconstruct}}}
 \title{looking for the optimal hash-based one-time signature}
@@ -87,128 +89,123 @@
 \maketitle
 \vspace{-2em}
 
-We restrict attention to one-time signatures that reveal values from a precomputed hash graph to reconstruct a public root. Within this class, we seek the least verification cost under key-generation and signature-size budgets.
+We study one-time signatures that reveal selected bits from a precomputed hash circuit to reconstruct a public root. Bits may be split, reused, and concatenated freely. We seek the least verification cost under key-generation and signature-size budgets, and give five constructions with strictly decreasing costs under the same parameters.
 
 \section{The framework}
-\paragraph{Hashes and keys.} Fix a digest size $n\ge2$, integer capacities $\roinput,\rooutput\ge1$ in $n$-bit blocks, and a public space $\mathcal T$ of hash addresses (tweaks). Our oracle is
+\paragraph{Hash oracle.} Fix a positive integer security parameter $\lambda$, an input capacity $\roinput$ in bits per cost unit, an output size $\rooutput$ in bits, and a public tweak space $\mathcal T$. Both sizes are positive integers. Our random oracle is
 \[
- H_\ell:\mathcal T\times\bigcup_{k\ge1}\{0,1\}^{kn}\longrightarrow\{0,1\}^{\ell n},\qquad 1\le\ell\le\rooutput,\qquad \hashcost(k)=\left\lceil k/\roinput\right\rceil.
+ H:\mathcal T\times\bigcup_{b\ge1}\{0,1\}^{b}\longrightarrow\{0,1\}^{\rooutput},\qquad \hashcost(x)=\left\lceil\frac{|x|}{\roinput}\right\rceil.
 \]
-Each tweak--input pair determines an independent uniform $\rooutput n$-bit string; $H_\ell$ returns its first $\ell$ blocks. A $kn$-bit input costs $\hashcost(k)$ units, independently of $\ell$. Write $H=H_1$. Sampling, storage, and other computation are free.
+The input $x$ is any nonempty bit string. Each distinct tweak--input pair has an independent uniform output. Tweaks, sampling, storage, and other computation are free. Write $z_{[r]}$ for the first $r$ bits of $z$; unused output bits may be discarded.
 
-Fix an acyclic hash graph~\cite{BM94}. A \emph{vertex} carries one $n$-bit value; a \emph{gate} is one hash call with ordered inputs and outputs. Gates have distinct tweaks, and each nonsource vertex has one producer. Sample independent $n$-bit sources, compute and store all values, and publish the root. Sizes are in bits; $N,S$ denote fixed parameters or budgets, $C$ costs determined by the graph and disclosure, and $X$ random call counts.
+\paragraph{Circuit and keys.} Fix a public acyclic circuit with independent uniform secret sources and fixed, possibly unequal bit lengths. Its single public root has exactly $\lambda$ bits. Hash gates have distinct tweaks; free \emph{wiring} splits, copies, reorders, and concatenates bits. Key generation samples the sources, evaluates and stores the circuit, and publishes the root. Whole-digest hash graphs~\cite{BM94} are a special case. Sizes are in bits; $N,S$ denote fixed parameters, $C$ deterministic costs, and $X$ random call counts.
 
-\paragraph{Disclosures.} A disclosure $D$ is an ordered list of vertices whose values reconstruct the root by graph evaluation; $|D|$ is the number of transmitted $n$-bit values. It must be \emph{minimal}: removing any listed vertex prevents reconstruction. Fix a public schedule using every disclosed value and evaluating each needed gate once. These are structural requirements; the public root is used only for the final comparison.
+\paragraph{Disclosures.} A disclosure $D$ lists circuit bits to send, grouped into fixed-length fields; $|D|_{\mathrm{bits}}$ is their total length. Its public schedule reconstructs the root by wiring and forward hashing, evaluating each needed gate once. Require \emph{symbolic minimality}: deleting any sent bit makes reconstruction impossible without guessing. Write $\mathsf{Rec}(D,z)$ for the schedule's output on supplied fields $z$, or $\bot$ for incorrect lengths. The public root is used only for the final comparison.
 
-\paragraph{Costs.} Let $\mathcal G$ be the set of all graph gates, $k_g$ the number of $n$-bit input blocks to gate $g$, and $\mathcal G(D)$ the gates in the reconstruction schedule for $D$. Define
+\paragraph{Costs.} Let $\mathcal G$ be the set of hash gates, $x_g$ the input to gate $g$, and $\mathcal G(D)$ the gates used to reconstruct the root from $D$. Define
 \[
- C_{\mathrm{keygen}}=\sum_{g\in\mathcal G}\hashcost(k_g),\qquad \reconstructcost(D)=\sum_{g\in\mathcal G(D)}\hashcost(k_g).
+ C_{\mathrm{keygen}}=\sum_{g\in\mathcal G}\hashcost(x_g),\qquad \reconstructcost(D)=\sum_{g\in\mathcal G(D)}\hashcost(x_g).
 \]
-Thus $\reconstructcost(D)$ is the cost of reconstructing the root from $D$, including seed expansions and the final root hash, but excluding message encoding. A gate is charged once even if its outputs are reused. Require $C_{\mathrm{keygen}}\le\keybudget$, where $\keybudget$ is the fixed key-generation cost budget.
+Reconstruction includes seed expansions and the final root hash, but excludes message encoding. Require $C_{\mathrm{keygen}}\le\keybudget$.
 
-\paragraph{Codebook.} Let $\sigbudget$ be the signature-size budget in bits and set $\fieldbudget=\lfloor\sigbudget/n\rfloor-2$ to reserve space for the $2n$-bit nonce. Fix a public ordered codebook of $\cutbudget=2^{n-1-\grinding}$ disclosures independently of the oracle, with integer $0\le\grinding\le n-1$. Require $|D|\le\fieldbudget$ and a common positive reconstruction cost for every disclosure. Require \emph{incomparability}: no disclosure can produce another by forward hashing. Tree cuts meet every root-to-leaf path once; they are minimal and incomparable at equal reconstruction cost. We check shared seeds below.
+\paragraph{Codebook.} Fix message and nonce lengths $\messagesize,\noncesize\ge1$, and an encoding length $1\le\encbits\le\rooutput$. Independently of the oracle, choose a public ordered codebook $(D_0,\ldots,D_{\disclosurecount-1})$, with $1\le\disclosurecount\le2^{\encbits}$. Require $|D_i|_{\mathrm{bits}}+\noncesize\le\sigbudget$, a common positive reconstruction cost, and structural \emph{incomparability}: no disclosure yields another by wiring and forward hashing alone. Computational security is a separate requirement below.
 
-\paragraph{Sign once.} Given a $2n$-bit message $m$, try distinct uniform $2n$-bit nonces $\eta$. Interpret all $n$ bits of $H(\tau_{\mathrm{enc}},m\Vert\eta)$ as an integer $d$, using a reserved tweak. If $d<\cutbudget$, send $\eta$ and the stored values of disclosure $d$. Otherwise retry, returning $\bot$ after a fixed limit $1\le N_{\mathrm{trials}}^{\max}\le2^{2n}$. Let $X_{\mathrm{RO,sign}}$ count these encoding queries. For a message fixed independently of the encoding oracle,
+\paragraph{Sign once.} Given a $\messagesize$-bit message $m$, try distinct uniform $\noncesize$-bit nonces $\eta$. Interpret $H(\tau_{\mathrm{enc}},m\Vert\eta)_{[\encbits]}$ as an integer $d$, using a reserved tweak. If $d<\disclosurecount$, send $\eta$ and the stored values of disclosure $d$. Otherwise retry, returning $\bot$ after a fixed limit $1\le N_{\mathrm{trials}}^{\max}\le2^{\noncesize}$. Let $X_{\mathrm{sign}}^{\mathrm{RO}}$ count these queries. For a message fixed independently of the encoding oracle,
 \[
- p=\cutbudget/2^n=2^{-\grinding-1},\qquad \mathbb E[X_{\mathrm{RO,sign}}]\le1/p,\qquad \Pr[\bot]=(1-p)^{N_{\mathrm{trials}}^{\max}}.
+ p=\frac{\disclosurecount}{2^{\encbits}},\qquad \mathbb E[X_{\mathrm{sign}}^{\mathrm{RO}}]\le1/p,\qquad \Pr[\bot]=(1-p)^{N_{\mathrm{trials}}^{\max}}.
 \]
-\paragraph{Verify.} Recompute $d$; reject invalid indices or any incorrect field count or length. Run the schedule for the selected disclosure $D$ and accept exactly when the reconstructed root matches the public key. The signature contains the nonce and $|D|$ values; verification adds one $4n$-bit message-and-nonce encoding query to reconstruction:
+The grinding work is $\log_2(1/p)$ bits; it is separate from the security target.
+\paragraph{Verify.} Recompute $d$; reject invalid indices or incorrect lengths. Run $D_d$'s schedule on the supplied fields and compare its output with $\mathsf{pk}$. Including the nonce and encoding query, the signature size and constant verification cost are
 \[
- |\sigma|=(2+|D|)n\le\sigbudget,\qquad C_{\mathrm{verif}}(D)=\reconstructcost(D)+\hashcost(4).
+ |\sigma|=\noncesize+|D|_{\mathrm{bits}}\le\sigbudget,\qquad C_{\mathrm{verif}}(D)=\reconstructcost(D)+\left\lceil\frac{\messagesize+\noncesize}{\roinput}\right\rceil.
 \]
-The codebook makes $C_{\mathrm{verif}}(D)$ constant on valid signatures; write $C_{\mathrm{verif}}$ for this common cost.
-\paragraph{Security target.} In a freshly sampled random oracle, a classical adversary receives the public key, accesses the oracle, makes at most one adaptive signing request, and wins by producing an accepted $(m,\sigma)$ pair never returned by the signer: \emph{strong one-time unforgeability}. For every such adversary and integer $\gamebudget\ge1$ bounding the entire experiment's cost on every execution path, the $n-1$-bit target is $\Pr[\mathrm{Forge}]\le\gamebudget/2^{n-1}$. Charge all queries by $\hashcost(k)$, including preprocessing, key generation, signing, adversarial queries, and final verification. Probability covers all randomness. This bound remains unproved; the results below establish combinatorial counts and costs.
+\paragraph{Disclosure security.} Give a classical adversary oracle access and the public key. It requests the values of one adaptively chosen disclosure $D_i$, then outputs a target index $j$ and fields $z$. Require, for every adversary and oracle-cost budget $\gamebudget\ge1$,
+\[
+ \Pr\bigl[0\le j<\disclosurecount,\ j\ne i,\ \mathsf{Rec}(D_j,z)=\mathsf{pk}\bigr]<\frac{\gamebudget}{2^\lambda}.
+\]
+The budget bounds each execution's total oracle cost, including preprocessing, key generation, and final checking; probability includes all randomness. The target is adaptive, and $z$ need only verify. Thus maximum cost divided by success probability exceeds $2^\lambda$. This additional condition requires no encoding of either disclosure.
 
-\paragraph{Counting and decoding.} In a counting polynomial $P(x,y)$, $[x^cy^f]P$ counts disclosures with reconstruction cost $c$ and $f$ transmitted values. Represent each choice by $x^cy^f$, add alternatives, and multiply independent choices. Local polynomials count only reconstruction within the indicated part of the graph; subsequent hashes are charged separately. Keep the first $\cutbudget$ eligible disclosures in a fixed order. Decode an index by counting valid completions of each local choice, selecting its index block, subtracting earlier block sizes, and repeating. No vertex identifiers or extra oracle queries are needed.
+\paragraph{Full signature security.} Replace disclosure access by at most one adaptive signing request. A forgery is an accepted $(m,\sigma)$ pair never returned by the signer: \emph{strong one-time unforgeability}. Require $\Pr[\mathrm{Forge}]<\gamebudget/2^{\lambda-1}$, with the same cost convention, including signing: strictly more than $\lambda-1$ security bits. This covers same-index forgeries and attacks combining encoding search with partial recovery. For our examples, both security requirements are conjectured; counts, costs, and structural incomparability are established.
 
-The illustration shows one possible disclosure in an irregular graph. Key generation samples the source secrets $s_i$ and evaluates the whole graph. For this signature, the verifier receives the orange values, computes the blue parts, and checks the reconstructed root against the public key; the gray parts are unused.
+\paragraph{Counting and decoding.} In $P(x,y)$, $[x^cy^f]P$ counts disclosures of cost $c$ and size $f$ in a stated unit. Add alternatives and multiply independent choices. Keep the first $\disclosurecount$ eligible disclosures in a fixed order. Decode recursively by counting completions of each local choice and locating the index among these blocks. No field identifiers or extra oracle queries are needed.
+
+\paragraph{A circuit and one disclosure.} Use 128-bit secrets and root. Split $H(\tau_1,s_1)_{[128]}=a_L\Vert a_R$ and $H(\tau_2,s_2)_{[256]}=b_L\Vert b_R\Vert c$, then mix halves from different sources. Half-digests have 64 bits; other values have 128 bits. Colors show what is sent, computed, or unused.
 
 \begin{center}
-\begin{tikzpicture}[x=.98cm,y=.8cm]
- \node[unused] (s2) at (0,6.8) {$s_2$};
- \node[unused] (s1) at (0,4.8) {$s_1$};
- \node[sent] (s3) at (0,2.5) {$s_3$};
- \node[unused] (s4) at (0,-.4) {$s_4$};
- \node[unused] (s5) at (0,-1.5) {$s_5$};
- \node[diagram label,above=8pt] at (s2.north) {Sampled secrets};
+\begin{tikzpicture}[x=1cm,y=.8cm,half value/.style={align=center,minimum width=9mm,minimum height=6mm}]
+ \node[unused] (s1) at (0,5.4) {$s_1$};
+ \node[sent] (s2) at (0,2.7) {$s_2$};
+ \node[unused] (s3) at (0,.2) {$s_3$};
+ \node[unused] (s4) at (0,-1) {$s_4$};
+ \node[diagram label,above=7pt] at (s1.north) {Secret sources};
 
- \node[unused] (c) at (2.7,6.8) {$c$};
- \node[unused] (a) at (2.7,5.6) {$a$};
- \node[sent] (b) at (2.7,4.3) {$b$};
- \node[computed] (d) at (2.7,3.3) {$x_1$};
- \node[computed] (e) at (2.7,2.2) {$x_2$};
- \node[computed] (f) at (2.7,1.1) {$x_3$};
- \node[sent] (z) at (2.7,-1) {$z$};
+ \node[sent,half value] (aL) at (3.3,6) {$a_L$\\[-1pt]\tiny 64 bits};
+ \node[unused,half value] (aR) at (3.3,4.8) {$a_R$\\[-1pt]\tiny 64 bits};
+ \node[computed,half value] (bL) at (3.3,3.8) {$b_L$\\[-1pt]\tiny 64 bits};
+ \node[unused,half value] (bR) at (3.3,2.7) {$b_R$\\[-1pt]\tiny 64 bits};
+ \node[computed] (c) at (3.3,1.6) {$c$};
+ \node[unused] (d) at (3.3,.2) {$d$};
+ \node[unused] (e) at (3.3,-1) {$e$};
 
- \node[sent] (u) at (5.3,6.2) {$u$};
- \node[computed] (v) at (5.3,4) {$v$};
- \node[computed] (w) at (5.3,2.2) {$w$};
- \node[computed] (t) at (5.3,-1) {$t$};
- \node[computed] (p) at (8.3,5) {$p$};
- \node[computed] (q) at (8.3,3.4) {$q$};
- \node[computed] (j) at (10.6,1.1) {$j$};
- \node[computed,minimum width=9mm] (r) at (12.4,3.7) {$\widehat r$};
- \node[diagram label,above=6pt] at (r.north) {Reconstructed root};
- \node[font=\small,right=5pt] at (r.east) {$\stackrel{?}{=}\mathsf{pk}$};
+ \node[font=\scriptsize,text=computedcolor] (joinu) at (5.8,5.7) {$a_L\Vert b_L$};
+ \node[font=\scriptsize,text=black!40] (joinv) at (5.8,3.2) {$a_R\Vert b_R$};
+ \node[diagram label,text=computedcolor,above=3pt] at (joinu.north) {concatenate freely};
+ \node[computed] (u) at (8.3,5.7) {$u$};
+ \node[sent] (v) at (8.3,3.2) {$v$};
+ \node[computed] (w) at (8.3,1.6) {$w$};
+ \node[sent] (t) at (8.3,-.4) {$t$};
+ \node[computed,minimum width=9mm] (root) at (12,2.7) {$\widehat r$};
+ \node[font=\small,right=5pt] at (root.east) {$\stackrel{?}{=}\mathsf{pk}$};
+ \node[diagram label,above=6pt] at (root.north) {Reconstructed root};
 
- % Hash operations are bare labels; only digest values have boxes.
- \node[text=black!40,font=\scriptsize,inner sep=2pt] (hc) at (1.3,6.8) {$H$};
- \node[text=black!40,font=\scriptsize,inner sep=2pt] (hab) at (1.3,4.8) {$H_2$};
- \node[text=black!40,font=\scriptsize,inner sep=2pt] (hu) at (4.1,6.2) {$H$};
- \node[text=black!40,font=\scriptsize,inner sep=2pt] (hz) at (1.3,-1) {$H$};
- \node[text=computedcolor,font=\scriptsize,inner sep=2pt] (hdef) at (1.3,2.5) {$H_3$};
- \node[text=computedcolor,font=\scriptsize,inner sep=2pt] (hv) at (4.1,4) {$H$};
- \node[text=computedcolor,font=\scriptsize,inner sep=2pt] (hw) at (4.1,2.2) {$H$};
- \node[text=computedcolor,font=\scriptsize,inner sep=2pt] (ht) at (4.1,-1) {$H$};
- \node[text=computedcolor,font=\scriptsize,inner sep=2pt] (hpq) at (7,4.1) {$H_2$};
- \node[text=computedcolor,font=\scriptsize,inner sep=2pt] (hj) at (9.5,1.1) {$H$};
- \node[text=computedcolor,font=\scriptsize,inner sep=2pt] (hr) at (11.2,3.7) {$H$};
+ % Hash labels are operations, not boxed values. Their output pieces are ordered top to bottom.
+ \node[font=\scriptsize,text=black!40] (ha) at (1.3,5.4) {$H$};
+ \node[font=\scriptsize,text=computedcolor] (hbc) at (1.3,2.7) {$H$};
+ \node[font=\scriptsize,text=black!40] (hd) at (1.3,.2) {$H$};
+ \node[font=\scriptsize,text=black!40] (he) at (1.3,-1) {$H$};
+ \node[font=\scriptsize,text=computedcolor] (hu) at (7.1,5.7) {$H$};
+ \node[font=\scriptsize,text=black!40] (hv) at (7.1,3.2) {$H$};
+ \node[font=\scriptsize,text=computedcolor] (hw) at (7.1,1.6) {$H$};
+ \node[font=\scriptsize,text=black!40] (ht) at (7.1,-.4) {$H$};
+ \node[font=\scriptsize,text=computedcolor] (hr) at (10.6,2.7) {$H$};
+ \node[diagram label,text=black!45] at (2.1,6.1) {split};
+ \node[diagram label,text=computedcolor] at (2.1,3.65) {split};
 
- \foreach \src/\dst in {s2/hc,hc/c,s1/hab,hab/a,hab/b,a/hu,c/hu,hu/u,s4/hz,s5/hz,hz/z} {\draw[unused edge] (\src)--(\dst);}
- \foreach \src/\dst in {s3/hdef,hdef/d,hdef/e,hdef/f,b/hv,d/hv,hv/v,e/hw,hw/w,z/ht,ht/t,u/hpq,v/hpq,hpq/p,hpq/q,q/hj,f/hj,t/hj,hj/j,p/hr,j/hr,hr/r} {\draw[active edge] (\src)--(\dst);}
- \coordinate (reuse) at (5.9,2.2);
- \draw[draw=computedcolor,semithick] (w.east)--(reuse);
- \fill[computedcolor] (reuse) circle[radius=1pt];
- \draw[active edge] (reuse)--(hpq);
- \draw[active edge] (reuse)--(hj);
- \node[diagram label,text=computedcolor,below=5pt] at (reuse) {reuse $w$};
+ \foreach \src/\dst in {s1/ha,ha/aL,ha/aR,aR/joinv,bR/joinv,joinv/hv,hv/v,s3/hd,hd/d,s4/he,he/e,d/ht,e/ht,ht/t} {\draw[unused edge] (\src)--(\dst);}
+ \foreach \src/\dst in {s2/hbc,hbc/bL,hbc/c,aL/joinu,bL/joinu,joinu/hu,hu/u,c/hw,hw/w,u/hr,v/hr,w/hr,t/hr,hr/root} {\draw[active edge] (\src)--(\dst);}
+ \draw[unused edge] (hbc)--(bR);
 
- \node[sent] (legend-sent) at (1.1,-2.7) {$n$ bits};
- \node[diagram label,right=5pt] at (legend-sent.east) {transmitted};
- \node[computed] (legend-computed) at (5.3,-2.7) {$n$ bits};
- \node[diagram label,right=5pt] at (legend-computed.east) {reconstructed};
- \node[unused] (legend-unused) at (9.5,-2.7) {$n$ bits};
- \node[diagram label,right=5pt] at (legend-unused.east) {unused in verification};
+ \node[sent] (legend-sent) at (1,-2.1) {sent};
+ \node[computed] (legend-computed) at (5.2,-2.1) {computed};
+ \node[unused] (legend-unused) at (9.8,-2.1) {not needed};
 \end{tikzpicture}
 \end{center}
 
-Each box holds one $n$-bit value. A bare $H_\ell$ label is one hash call producing $\ell$ values; $H=H_1$. At each hash label, inputs and outputs are ordered from top to bottom; distinct tweaks are omitted. The two arrows leaving $w$ reuse the same value. This illustration uses up to three output blocks per call.
-
-Hash a $2n$-bit message $m$ with a $2n$-bit nonce $\eta$ to select a disclosure from a fixed codebook; retry when the hash is not accepted. For the highlighted disclosure,
+Bare $H$ labels denote hash calls. Pieces and inputs are ordered top to bottom; unused suffixes and distinct tweaks are omitted. Encoding selects the fields:
 \[
- (m,\eta)\xrightarrow{H(\tau_{\mathrm{enc}},m\Vert\eta)}d\xrightarrow{\text{codebook}}D_d=(u,b,s_3,z),\qquad \sigma=(\eta,\textcolor{sentcolor}{u,b,s_3,z}).
+ (m,\eta)\xrightarrow{H(\tau_{\mathrm{enc}},m\Vert\eta)_{[\encbits]}}d\xrightarrow{\text{codebook}}D_d=(a_L,s_2,v,t),\qquad \sigma=(\eta,\textcolor{sentcolor}{a_L,s_2,v,t}).
 \]
-Every highlighted value is needed; neither the graph nor vertex identifiers are sent. With $\roinput=4$, all drawn calls cost one unit: the whole graph has $C_{\mathrm{keygen}}=11$, the seven blue calls give $\reconstructcost(D_d)=7$, and encoding gives $C_{\mathrm{verif}}(D_d)=8$. The signature has $(2+4)n=6n$ bits.
+Expand $s_2$, compute $u,w$, then hash $(u,v,w,t)$. With $\roinput=512$, $\rooutput\ge256$, and 256-bit messages and nonces, key generation costs 9 units, reconstruction 4, and verification 5; the signature has $256+64+3\cdot128=704$ bits. This illustrates one disclosure; a secure codebook is a further requirement.
 
 \clearpage
-\section{Four constructions under the same budgets}
+\section{Five constructions under the same budgets}
 Take
 \[
- n=128,\quad \grinding=15,\quad \roinput=\rooutput=4,\quad \keybudget=168,\quad \fieldbudget=128.
+ \lambda=128,\qquad \roinput=\rooutput=512,\qquad \keybudget=168,\qquad \sigbudget=16640.
 \]
-We need $2^{112}$ disclosures. Every scheme has a 128-bit public key, signatures of at most $130n=16640$ bits, and at most $2^{16}$ expected signing queries. Encoding costs one verification unit. The constructions below use \textbf{73, 68, 63, and 60 verification units}.
+All schemes use 128-bit secrets and public keys, 256-bit messages and nonces, and 128 encoding bits. A codebook of $2^{113}$ disclosures gives 15 grinding bits and at most $2^{15}$ expected signing queries. Encoding costs one verification unit. Full signature security targets strictly above 127 bits. The verification costs decrease strictly: $\mathbf{74>69>64>61>58}$.
 
-In the drawings, orange double boxes are transmitted values, blue parts are computed, and gray parts are unused during verification. A merge hashes all incoming values together; an $H_\ell$ gate produces $\ell$ values in one query. Crossings connect only where marked with a dot. Repeated parts are labeled with their actual counts.
+Every hash call returns 512 bits. Ordinary digests retain 128 bits; seed expansions use the prefixes specified below. In counting polynomials, $y$ counts 128-bit values in examples 1--4 and 32-bit pieces in example 5. Diagram labels show input bits $\to$ retained bits. Orange boxes are transmitted, blue parts are computed, and gray parts are unused. Arrows entering a value box without an explicit gate mean hash and truncate. Crossings connect only at marked dots.
 
-\subsection{Top-of-the-hypercube chains: 73 units}
+\subsection{Top-of-the-hypercube chains: 74 units}
 A chain repeatedly hashes a secret to an endpoint. Revealing an intermediate value lets the verifier advance to that endpoint. Join several chains by hashing their endpoints into the public key. The signature sends one value per chain; choose positions with a fixed sum of remaining distances. This is the top-layer encoding of Khovratovich et al.~\cite{hypercube}.
 
-Use 23 chains of length two and 93 of length one, with total remaining distance 43. In the drawing, $s_i$ is a secret, $u_i$ an intermediate value, and $e_i$ an endpoint. The six illustrated distances are $2,1,0,1,0,1$.
+Use 23 chains of length two and 93 of length one, with total remaining distance 44. In the drawing, $s_i$ is a secret, $u_i$ an intermediate value, and $e_i$ an endpoint. The six illustrated distances are $2,1,0,1,0,1$.
 
 \begin{center}
 \begin{tikzpicture}[x=1cm,y=1cm]
  \node[computed,minimum width=13mm] (pk) at (8,2.2) {$\mathsf{pk}$};
- \node[diagram label,right=5pt] at (pk.east) {one $116n\to n$ hash\\29 units};
+ \node[diagram label,right=5pt] at (pk.east) {one $14848\to128$ hash\\29 units};
  \foreach \i/\yy in {1/4.3,2/3.5,3/2.7} {
    \ifnum\i=1 \def\ss{sent}\def\us{computed}\def\es{computed}\else\ifnum\i=2 \def\ss{unused}\def\us{sent}\def\es{computed}\else \def\ss{unused}\def\us{unused}\def\es{sent}\fi\fi
    \node[\ss] (s\i) at (0,\yy) {$s_\i$};
@@ -234,35 +231,35 @@ Use 23 chains of length two and 93 of length one, with total remaining distance 
 \end{tikzpicture}
 \end{center}
 
-Let $G_L(x)=1+x+\cdots+x^L$ count positions in a length-$L$ chain. There are enough disclosures because $[x^{43}]G_2^{23}G_1^{93}>2^{112}$. Building the chains costs $23\cdot2+93=139$ units; the $116n\to n$ root hash costs 29. Hence
+Let $G_L(x)=1+x+\cdots+x^L$ count positions in a length-$L$ chain. There are enough disclosures because $[x^{44}]G_2^{23}G_1^{93}>2^{113}$. Building the chains costs $23\cdot2+93=139$ units; the $14848\to128$ root hash costs 29. Hence
 \[
- C_{\mathrm{keygen}}=139+29=168,\qquad |\sigma|=118n,\qquad C_{\mathrm{verif}}=43+29+1=\mathbf{73}.
+ C_{\mathrm{keygen}}=139+29=168,\qquad |\sigma|=15104,\qquad C_{\mathrm{verif}}=44+29+1=\mathbf{74}.
 \]
-\paragraph{Why this is optimal among chains.} For fixed total length and number of chains, balanced lengths maximize every coefficient: for $b\ge a+2$,
+\paragraph{Optimal disclosure counts within this chain family.} For fixed total length and number of chains, balanced lengths maximize every coefficient: for $b\ge a+2$,
 \[
  G_{a+1}G_{b-1}-G_aG_b=x^{a+1}G_{b-a-2}\ge0.
 \]
-Extra length cannot hurt. With $t$ chains, spend the available $168-\lceil t/4\rceil$ unary hashes on balanced lengths: put $\lambda_t=\lfloor(168-\lceil t/4\rceil)/t\rfloor$ and $a_t=168-\lceil t/4\rceil-t\lambda_t$. Exact coefficient expansion gives
+Extra length cannot hurt. With $t$ chains, spend the available $168-\lceil t/4\rceil$ unary hashes on balanced lengths: put $L_t=\lfloor(168-\lceil t/4\rceil)/t\rfloor$ and $a_t=168-\lceil t/4\rceil-tL_t$. Exact coefficient expansion gives
 \[
- \max_{1\le t\le128}[x^{71-\lceil t/4\rceil}]G_{\lambda_t}^{t-a_t}G_{\lambda_t+1}^{a_t}<2^{112}.
+ \max_{1\le t\le128}[x^{72-\lceil t/4\rceil}]G_{L_t}^{t-a_t}G_{L_t+1}^{a_t}<2^{113}.
 \]
-These coefficient sequences are symmetric and unimodal; their midpoints correspond to reconstruction costs above 71. Thus no disclosure layer with reconstruction cost at most 71 supplies enough choices: the minimum verification cost, including encoding, is 73 units.
+These coefficient sequences are symmetric and unimodal; their midpoints correspond to reconstruction costs above 72. Thus no layer in this chain family with reconstruction cost at most 72 supplies enough choices. The minimum verification cost that meets the counting requirement is therefore 74 units.
 
 \clearpage
-\subsection{A branching forest: 68 units}
+\subsection{A branching forest: 69 units}
 Group four one-step chains into a component: hash secrets $s_{ji}$ into endpoints $e_{ji}$, then hash the four endpoints into a component root $g_j$. Use 32 independent components and hash their roots into the public key.
 
 A disclosure may send a component root directly, or expand it and send one value from each of its four chains. Branching therefore adds a choice of which components to expand. The drawing shows three possibilities on the same underlying shape.
 
 \begin{center}
 \begin{tikzpicture}[x=1cm,y=1cm]
- \node[computed,minimum width=13mm] (pk) at (8,2.3) {$\mathsf{pk}$};
- \node[diagram label,right=5pt] at (pk.east) {one $32n\to n$ hash\\8 units};
- \foreach \j/\yy in {1/4.6,2/2.3,3/0} {
+ \node[computed,minimum width=13mm] (pk) at (8,3.4) {$\mathsf{pk}$};
+ \node[diagram label,right=5pt] at (pk.east) {one $4096\to128$ hash\\8 units};
+ \foreach \j/\yy in {1/6.8,2/3.4,3/0} {
    \ifnum\j=2 \def\gs{sent}\else \def\gs{computed}\fi
    \node[\gs] (g\j) at (4.6,\yy) {$g_\j$};
-   \node[diagram label,below=3pt,text=black!60] at (g\j.south) {$4n\to n$};
-   \foreach \i/\dy in {1/.66,2/.22,3/-.22,4/-.66} {
+   \node[diagram label,below=3pt,text=black!60] (gsize\j) at (g\j.south) {$512\to128$};
+   \foreach \i/\dy in {1/.93,2/.31,3/-.31,4/-.93} {
      \def\ss{unused}\def\es{sent}
      \ifnum\j=2 \def\es{unused}\fi
      \ifnum\j=1 \ifodd\i \def\ss{sent}\def\es{computed}\fi\fi
@@ -275,12 +272,12 @@ A disclosure may send a component root directly, or expand it and send one value
    }
    \draw[active edge] (g\j.east)--(pk.west);
  }
- \node[diagram label] (more) at (5.6,-1.3) {29 further component roots};
+ \node[diagram label] (more) at (5.6,-1.65) {29 further component roots};
  \draw[active edge,dotted] (more.east) to[out=10,in=-90] (pk.south);
  \begin{scope}[on background layer]
-   \node[group,fit=(s11)(s14)(g1),label={[diagram label]above:Component 1: send 4 values; compute 3 hashes}] {};
-   \node[group,fit=(s21)(s24)(g2),label={[diagram label]above:Component 2: send its root; compute nothing locally}] {};
-   \node[group,fit=(s31)(s34)(g3),label={[diagram label]above:Component 3: send 4 endpoints; compute 1 hash}] {};
+   \node[group,fit=(s11)(s14)(g1)(gsize1),label={[diagram label]above:Component 1: send 4 values; compute 3 hashes}] {};
+   \node[group,fit=(s21)(s24)(g2)(gsize2),label={[diagram label]above:Component 2: send its root; compute nothing locally}] {};
+   \node[group,fit=(s31)(s34)(g3)(gsize3),label={[diagram label]above:Component 3: send 4 endpoints; compute 1 hash}] {};
  \end{scope}
 \end{tikzpicture}
 \end{center}
@@ -289,19 +286,19 @@ The local counting polynomial is
 \[
  P_{\mathrm{forest}}(x,y)=\underbrace{y}_{\text{send the root}}+\underbrace{xy^4(1+x)^4}_{\text{expand the root, then choose four chain positions}}.
 \]
-Each component costs five units to build and sends at most four values. Choose disclosures for which reconstructing the 32 component roots costs 59 in total. Since $[x^{59}]P_{\mathrm{forest}}(x,1)^{32}>2^{112}$, this supplies the codebook, with at most 128 values. The final $32n\to n$ hash costs eight units, giving
+Each component costs five units to build and sends at most four values. Choose disclosures for which reconstructing the 32 component roots costs 60 in total. Since $[x^{60}]P_{\mathrm{forest}}(x,1)^{32}>2^{113}$, this supplies the codebook, with at most 128 values. The final $4096\to128$ hash costs eight units, giving
 \[
- C_{\mathrm{keygen}}=32\cdot5+8=168,\qquad C_{\mathrm{verif}}=59+8+1=\mathbf{68}.
+ C_{\mathrm{keygen}}=32\cdot5+8=168,\qquad C_{\mathrm{verif}}=60+8+1=\mathbf{69}.
 \]
 This improves on the optimal chain baseline; optimality among all trees is not claimed.
 
 \clearpage
-\subsection{Pairwise shared seeds: 63 units}
+\subsection{Pairwise shared seeds: 64 units}
 Derive two leaves from one secret seed and reveal the seed when both leaves are needed.\footnote{This idea was suggested by Justin Drake.} This replaces two transmitted values with one, at the cost of one expansion query. Here the paired leaves belong to different authentication rows, so one seed helps reconstruct two row hashes.
 
-Arrange sixteen leaves in four rows of four. Hash each row into $t_i$, then hash the four row roots into a component root $g$. Four seeds supply rows 1 and 2; four independent seeds supply rows 3 and 4:
+Arrange sixteen leaves in four rows of four. Hash each row into $t_i$, then hash the four row roots into a component root $g$. Four seeds supply rows 1 and 2; four independent seeds supply rows 3 and 4. For $b=1,2$ and $j=1,\ldots,4$,
 \[
- H_2(\tau^s_{bj},s_{bj})=\ell_{2b-1,j}\Vert\ell_{2b,j}\quad(b=1,2;\ j=1,\ldots,4),\qquad t_i=H(\tau^t_i,\ell_{i1}\Vert\cdots\Vert\ell_{i4}),\qquad g=H(\tau_g,t_1\Vert\cdots\Vert t_4).
+ H(\tau^s_{bj},s_{bj})_{[256]}=\ell_{2b-1,j}\Vert\ell_{2b,j},\qquad t_i=H(\tau^t_i,\ell_{i1}\Vert\cdots\Vert\ell_{i4})_{[128]},\qquad g=H(\tau_g,t_1\Vert\cdots\Vert t_4)_{[128]}.
 \]
 For rows 1--2, reveal seeds in columns 1, 2, and 4; for row 3, reveal seeds in columns 2 and 4. Send the missing leaves and $t_4$. This supplies five seeds, four leaves, and one row root. Reconstructing $g$ takes five seed expansions, three row hashes, and one final hash: nine units.
 \begin{center}
@@ -316,34 +313,130 @@ Every listed disclosure is minimal: removing a row root leaves an unreconstructi
 
 For pairs, the full component polynomial is $P_{\mathrm{pairs}}=y+xQ_2^2$: send $g$, or compute it from two independent row pairs. Use 12 components, each costing eight seed expansions and five combining hashes to build. The exact count
 \[
- \sum_{f=1}^{128}[x^{59}y^f]P_{\mathrm{pairs}}(x,y)^{12}>2^{112}
+ \sum_{f=1}^{128}[x^{60}y^f]P_{\mathrm{pairs}}(x,y)^{12}>2^{113}
 \]
-provides the codebook. The final $12n\to n$ hash costs three units, so
+provides the codebook. The final $1536\to128$ hash costs three units, so
 \[
- C_{\mathrm{keygen}}=12\cdot13+3=159\le168,\qquad C_{\mathrm{verif}}=59+3+1=\mathbf{63}.
+ C_{\mathrm{keygen}}=12\cdot13+3=159\le168,\qquad C_{\mathrm{verif}}=60+3+1=\mathbf{64}.
 \]
 
 \clearpage
-\subsection{Seeds shared by four leaves: 60 units}
+\subsection{Seeds shared by four leaves: 61 units}
 Keep the same four rows, but let each seed generate a whole column:
 \[
- H_4(\tau^s_j,s_j)=\ell_{1j}\Vert\ell_{2j}\Vert\ell_{3j}\Vert\ell_{4j}\quad(j=1,\ldots,4).
+ H(\tau^s_j,s_j)=\ell_{1j}\Vert\ell_{2j}\Vert\ell_{3j}\Vert\ell_{4j}\quad(j=1,\ldots,4).
 \]
-The row hashes $t_i$ and component root $g$ are unchanged. Each component now needs four seed expansions and five combining hashes to build, costing nine units. A revealed seed can replace one leaf in each row being reconstructed: with $k$ such rows, it saves $(k-1)n$ signature bits for one extra query.
+The row hashes $t_i$ and component root $g$ are unchanged. Each component now needs four seed expansions and five combining hashes to build, costing nine units. A revealed seed can replace one leaf in each row being reconstructed: with $k$ such rows, it saves $128(k-1)$ signature bits for one extra query.
 
 For example, send $t_4$ and reconstruct rows 1--3. Seeds $s_1,s_2$ supply the first two columns, leaving six individual leaves to send. The disclosure therefore contains $1+2+6=9$ values. Computing $g$ takes two expansions, three row hashes, and one final hash: six units.
 \begin{center}
 \seeddiagram{4}
 \end{center}
 
-The same counting rule now uses $r=4$. The component polynomial is $P_{\mathrm{four}}=y+xQ_4$: send $g$, or reconstruct it from the four rows. Use 18 components and select disclosures for which reconstructing the component roots costs 54 in total, with at most 128 values. There are enough because
+The same counting rule now uses $r=4$. The component polynomial is $P_{\mathrm{four}}=y+xQ_4$: send $g$, or reconstruct it from the four rows. Use 18 components and select disclosures for which reconstructing the component roots costs 55 in total, with at most 128 values. There are enough because
 \[
- \sum_{f=1}^{128}[x^{54}y^f]P_{\mathrm{four}}(x,y)^{18}>2^{112}.
+ \sum_{f=1}^{128}[x^{55}y^f]P_{\mathrm{four}}(x,y)^{18}>2^{113}.
 \]
-The final $18n\to n$ hash costs five units. Thus the same public-key and signature-size bounds are met with
+The final $2304\to128$ hash costs five units. Thus the same public-key size and signature-size bound are met with
 \[
- C_{\mathrm{keygen}}=18\cdot9+5=167\le168,\qquad C_{\mathrm{verif}}=54+5+1=\mathbf{60}.
+ C_{\mathrm{keygen}}=18\cdot9+5=167\le168,\qquad C_{\mathrm{verif}}=55+5+1=\mathbf{61}.
 \]
+
+\clearpage
+\subsection{Splitting hash outputs: 58 units}
+Split each seed's hash output into smaller pieces to supply more rows without enlarging their hash inputs. Use five independent groups, each with sixteen 128-bit seeds $s_j$. Split the first 384 output bits into twelve 32-bit pieces, arranged as a column, and hash each row into a 128-bit root:
+\[
+ H(\tau^s_j,s_j)_{[384]}=a_{1j}\Vert\cdots\Vert a_{12,j},\quad |a_{ij}|=32,\qquad t_i=H(\tau^t_i,a_{i1}\Vert\cdots\Vert a_{i,16})_{[128]}.
+\]
+Each expansion uses 384 of the 512 output bits. Every row input has $16\cdot32=512$ bits and costs one unit. Hash all sixty row roots, in group and row order, into the public key; this 7680-bit input costs fifteen units. All tweaks are distinct, including across groups and from encoding. The group index is omitted above.
+
+For one group, choose rows $I$ to reconstruct and seeds $J$ to reveal. Write $k=|I|$ and $q=|J|$. Send the other $12-k$ row roots, the $q$ seeds, and the $k(16-q)$ individual pieces in rows $I$ and columns outside $J$. The diagram shows $k=4$, $q=8$.
+
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,quarter/.style={minimum width=2.8mm,minimum height=2.8mm,inner sep=0pt,rounded corners=.4pt}]
+ \node[diagram label] at (4.65,7.87) {Sixteen seeds, each 128 bits};
+ \foreach \j in {1,...,16} {
+   \pgfmathtruncatemacro{\shownseed}{\j==1 || \j==2 || \j==5 || \j==7 || \j==10 || \j==12 || \j==13 || \j==16}
+   \ifnum\shownseed=1 \def\ss{sent}\def\edgekind{active edge}\def\buscolor{computedcolor}\else \def\ss{unused}\def\edgekind{unused edge}\def\buscolor{black!25}\fi
+   \node[\ss,minimum width=5mm,font=\tiny] (qs-\j) at ({.62*(\j-1)},7.37) {$s_{\j}$};
+   \node[font=\scriptsize,text=\buscolor,inner sep=1pt] (qh-\j) at ({.62*(\j-1)},6.84) {$H$};
+   \draw[\edgekind] (qs-\j)--(qh-\j);
+   \draw[draw=\buscolor,thin] (qh-\j.east)--({.62*(\j-1)+.25},6.84)--({.62*(\j-1)+.25},-.28);
+   \foreach \i in {1,...,12} {
+     \pgfmathtruncatemacro{\shownrow}{\i==1 || \i==4 || \i==7 || \i==11}
+     \ifnum\shownrow=1 \ifnum\shownseed=1 \def\ps{computed}\else \def\ps{sent}\fi\else \def\ps{unused}\fi
+     \node[\ps,quarter] (qa-\i-\j) at ({.62*(\j-1)},{6.32-.6*(\i-1)}) {};
+     \fill[\buscolor] ({.62*(\j-1)+.25},{6.32-.6*(\i-1)}) circle[radius=.5pt];
+     \draw[\edgekind,thin] ({.62*(\j-1)+.25},{6.32-.6*(\i-1)})--(qa-\i-\j.east);
+   }
+ }
+ \node[diagram label] at (10.35,7.87) {Row hashes\\$512\to128$ bits};
+ \foreach \i in {1,...,12} {
+   \pgfmathtruncatemacro{\shownrow}{\i==1 || \i==4 || \i==7 || \i==11}
+   \ifnum\shownrow=1 \def\ts{computed}\def\edgekind{active edge}\def\hashcolor{computedcolor}\else \def\ts{sent}\def\edgekind{unused edge}\def\hashcolor{black!25}\fi
+   \begin{scope}[on background layer]
+     \node[draw=black!15,rounded corners=2pt,inner xsep=4pt,inner ysep=2pt,fit=(qa-\i-1)(qa-\i-16)] (qrow-\i) {};
+   \end{scope}
+   \node[font=\scriptsize,text=\hashcolor,inner sep=1pt] (qrh-\i) at (10.35,{6.32-.6*(\i-1)}) {$H$};
+   \node[\ts,minimum width=6mm] (qt-\i) at (11.15,{6.32-.6*(\i-1)}) {$t_\i$};
+   \draw[\edgekind] (qrow-\i.east)--(qrh-\i);
+   \draw[\edgekind] (qrh-\i)--(qt-\i);
+ }
+ \node[text=computedcolor,font=\small,inner sep=2pt] (qroot) at (12.6,3.02) {$H$};
+ \node[computed,minimum width=9mm] (qpk) at (13.65,3.02) {$\mathsf{pk}$};
+ \foreach \i in {1,...,12} {\draw[active edge] (qt-\i.east)--(qroot);}
+ \draw[active edge] (qroot)--(qpk);
+ \node[diagram label] at (13.1,6.45) {Final root hash\\$7680\to128$ bits\\15 units};
+ \node[diagram label] (qmore) at (12.45,-.75) {48 row roots\\from four further groups};
+ \draw[active edge,dotted] (qmore.north)--(qroot.south);
+ \node[diagram label] at (4.65,-1) {Each column splits the first 384 output bits into twelve 32-bit pieces.\\Each outlined row concatenates sixteen pieces, from left to right.};
+\end{tikzpicture}
+\end{center}
+
+Small squares hold 32-bit pieces; larger boxes hold 128-bit values. Orange values are sent, blue values are computed, and gray values are unused. Here the signature sends eight seeds, eight row roots, and thirty-two pieces: 3072 bits locally, with eight expansions and four row hashes. Seed expansions also produce gray pieces, which this disclosure does not use.
+
+\paragraph{Allowed choices and security intuition.} Allow $q=0$ for every $k$. If $q>0$, require $k\ge4$, and also $q\le12$ unless $k=12$. Every revealed seed therefore contributes at least 128 output bits to reconstructed rows, and every unopened row has at least 128 input bits not supplied by revealed seeds. These restrictions keep the direct seed-replacement and row-opening attacks from depending on just one short piece, motivating the security conjecture. Let $\mathcal A$ be this set of pairs $(k,q)$, with $0\le k\le12$ and $0\le q\le16$.
+
+\paragraph{Counting and encoding.} Measure local size in 32-bit pieces. A choice $(k,q)$ has cost $k+q$ and size $4(12-k+q)+k(16-q)$, so its counting polynomial is
+\[
+ P_{\mathrm{split}}(x,y)=\sum_{(k,q)\in\mathcal A}\binom{12}k\binom{16}q x^{k+q}y^{4(12-k+q)+k(16-q)}.
+\]
+Each disclosure is minimal. Structural forward evaluation can only remove selected rows or selected seeds, strictly reducing local cost; hence equal total cost gives incomparable disclosures. Across five groups, require total local cost 42 and at most 512 pieces. Exact coefficient expansion gives
+\[
+ \sum_{f=0}^{512}[x^{42}y^f]P_{\mathrm{split}}(x,y)^5=12233437221986845075106254305541360>2^{113}.
+\]
+Keep the first $2^{113}$ choices in a fixed order and use the framework's signing and verification algorithms. The index determines which fields are 32-bit pieces and which are 128-bit seeds or roots; no identifiers or padding are transmitted.
+
+\paragraph{Costs.} There are at most $512\cdot32+256=16640$ signature bits, meeting the common budget. The following table lists actual oracle queries; $C_{\mathrm{expand}}$ and $C_{\mathrm{rows}}$ are the disclosure-dependent totals across the five groups, with $C_{\mathrm{expand}}+C_{\mathrm{rows}}=42$.
+\begin{center}
+\begin{tabular}{lrrrrr}
+Operation & Input bits & Output bits & Retained bits & Keygen queries & Verif. queries\\
+\hline
+Seed expansion & 128 & 512 & 384 & 80 & $C_{\mathrm{expand}}$\\
+Row hash & 512 & 512 & 128 & 60 & $C_{\mathrm{rows}}$\\
+Public-root hash & 7680 & 512 & 128 & 1 & 1\\
+Message encoding & 512 & 512 & 128 & 0 & 1
+\end{tabular}
+\end{center}
+Only the public-root query costs more than one unit. Therefore
+\[
+ C_{\mathrm{keygen}}=80+60+15=155\le168,\qquad C_{\mathrm{verif}}=42+15+1=\mathbf{58}.
+\]
+Signature size may vary below its upper bound; verification cost is constant. Splitting lets twelve rows share each seed without enlarging row inputs, improving on the four preceding constructions under the same budgets. Optimality among arbitrary circuits is not claimed.
+
+\section{A general bound for whole-digest trees}
+\begin{proposition}[A bound for all whole-digest trees]
+Let every vertex of a tree $T$ hold $\lambda$ bits, with $\roinput=4\lambda$ and $\rooutput\ge \lambda$. Each internal vertex hashes its children and retains $\lambda$ output bits. Then $T$ has at most $1+2^{4C_{\mathrm{keygen}}(T)/5}$ whole-vertex cuts, where a cut meets every source-to-root path once.
+\end{proposition}
+\begin{proof}
+Let $F(T)$ count cuts. A source has $F=1$. If the root has $d$ children $T_i$, then $F(T)=1+\prod_i F(T_i)$ and $C_{\mathrm{keygen}}(T)=\lceil d/4\rceil+\sum_i C_{\mathrm{keygen}}(T_i)$. Prove the auxiliary bound $F(T)\le2^{(4C_{\mathrm{keygen}}(T)+1)/5}$ by induction. At costs $0,1,2,3$, the maximum cut counts are $1,2,3,5$, which satisfy it. Applying the auxiliary bound to the children gives
+\[
+ F(T)\le1+2^{(4\sum_i C_{\mathrm{keygen}}(T_i)+d)/5}\le1+2^{4C_{\mathrm{keygen}}(T)/5}.
+\]
+For $C_{\mathrm{keygen}}(T)\ge4$, this also implies the auxiliary bound and closes the induction. The small cases satisfy the stated bound directly.
+\end{proof}
+When $C_{\mathrm{keygen}}$ is a positive multiple of five, the bound is attained by $4C_{\mathrm{keygen}}/5$ one-step chains joined by a root hash costing $C_{\mathrm{keygen}}/5$ units. This result counts all cuts; it does not determine the optimum after imposing signature-size and equal-cost restrictions, or when seeds are shared.
+
 \begin{thebibliography}{KKW25}
 \bibitem[BM94]{BM94} Daniel Bleichenbacher and Ueli~M. Maurer. Directed acyclic graphs, one-way functions and digital signatures. In Yvo Desmedt, editor, \emph{Advances in Cryptology---CRYPTO '94}, volume 839 of \emph{LNCS}, pages 75--82. Springer, 1994. \url{https://crypto.ethz.ch/publications/files/BleMau94.pdf}.
 \bibitem[KKW25]{hypercube} Dmitry Khovratovich, Mikhail Kudinov, and Benedikt Wagner. At the top of the hypercube---better size-time tradeoffs for hash-based signatures. In \emph{Advances in Cryptology---CRYPTO 2025, Part VI}, volume 16005 of \emph{LNCS}, pages 93--123. Springer, 2025. Full version: IACR Cryptology ePrint Archive, Report 2025/889. \url{https://eprint.iacr.org/2025/889}.
