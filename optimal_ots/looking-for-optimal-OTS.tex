@@ -2,6 +2,8 @@
 \usepackage[margin=0.75in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \newtheorem{proposition}{Proposition}
+\newtheorem{theorem}[proposition]{Theorem}
+\newtheorem{corollary}[proposition]{Corollary}
 \usepackage{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,fit,backgrounds}
@@ -80,6 +82,7 @@
 \newcommand{\noncesize}{S_{\mathrm{nonce}}}
 \newcommand{\encbits}{N_{\mathrm{enc}}}
 \newcommand{\disclosurecount}{N_{\mathrm{disclosures}}}
+\newcommand{\digestbudget}{N_{\mathrm{digests}}^{\max}}
 \newcommand{\hashcost}{c_{\mathrm{hash}}}
 \newcommand{\reconstructcost}{C_{\mathrm{reconstruct}}}
 \title{looking for the optimal hash-based one-time signature}
@@ -89,7 +92,7 @@
 \maketitle
 \vspace{-2em}
 
-We study one-time signatures that reveal selected bits from a precomputed hash circuit to reconstruct a public root. Bits may be split, reused, and concatenated freely. We seek the least verification cost under key-generation and signature-size budgets, and give five constructions with strictly decreasing costs under the same parameters.
+We study one-time signatures that reveal selected bits from a precomputed hash circuit to reconstruct a public root. Bits may be split, reused, and concatenated freely. We seek the least verification cost under key-generation and signature-size budgets. We compare five constructions under common parameters, then extend the framework with polynomial coding and prove lower bounds for whole-digest trees.
 
 \section{The framework}
 \paragraph{Hash oracle.} Fix a positive integer security parameter $\lambda$, an input capacity $\roinput$ in bits per cost unit, an output size $\rooutput$ in bits, and a public tweak space $\mathcal T$. Both sizes are positive integers. Our random oracle is
@@ -424,31 +427,12 @@ Only the public-root query costs more than one unit. Therefore
 \]
 Signature size may vary below its upper bound; verification cost is constant. Splitting lets twelve rows share each seed without enlarging row inputs, improving on the four preceding constructions under the same budgets. Optimality among arbitrary circuits is not claimed.
 
-\section{A general bound for whole-digest trees}
-\begin{proposition}[A bound for all whole-digest trees]
-Let every vertex of a tree $T$ hold $\lambda$ bits, with $\roinput=4\lambda$ and $\rooutput\ge \lambda$. Each internal vertex hashes its children and retains $\lambda$ output bits. Then $T$ has at most $1+2^{4C_{\mathrm{keygen}}(T)/5}$ whole-vertex cuts, where a cut meets every source-to-root path once.
-\end{proposition}
-\begin{proof}
-Let $F(T)$ count cuts. A source has $F=1$. If the root has $d$ children $T_i$, then $F(T)=1+\prod_i F(T_i)$ and $C_{\mathrm{keygen}}(T)=\lceil d/4\rceil+\sum_i C_{\mathrm{keygen}}(T_i)$. Prove the auxiliary bound $F(T)\le2^{(4C_{\mathrm{keygen}}(T)+1)/5}$ by induction. At costs $0,1,2,3$, the maximum cut counts are $1,2,3,5$, which satisfy it. Applying the auxiliary bound to the children gives
-\[
- F(T)\le1+2^{(4\sum_i C_{\mathrm{keygen}}(T_i)+d)/5}\le1+2^{4C_{\mathrm{keygen}}(T)/5}.
-\]
-For $C_{\mathrm{keygen}}(T)\ge4$, this also implies the auxiliary bound and closes the induction. The small cases satisfy the stated bound directly.
-\end{proof}
-When $C_{\mathrm{keygen}}$ is a positive multiple of five, the bound is attained by $4C_{\mathrm{keygen}}/5$ one-step chains joined by a root hash costing $C_{\mathrm{keygen}}/5$ units. This result counts all cuts; it does not determine the optimum after imposing signature-size and equal-cost restrictions, or when seeds are shared.
-
-\begin{thebibliography}{KKW25}
-\bibitem[BM94]{BM94} Daniel Bleichenbacher and Ueli~M. Maurer. Directed acyclic graphs, one-way functions and digital signatures. In Yvo Desmedt, editor, \emph{Advances in Cryptology---CRYPTO '94}, volume 839 of \emph{LNCS}, pages 75--82. Springer, 1994. \url{https://crypto.ethz.ch/publications/files/BleMau94.pdf}.
-\bibitem[KKW25]{hypercube} Dmitry Khovratovich, Mikhail Kudinov, and Benedikt Wagner. At the top of the hypercube---better size-time tradeoffs for hash-based signatures. In \emph{Advances in Cryptology---CRYPTO 2025, Part VI}, volume 16005 of \emph{LNCS}, pages 93--123. Springer, 2025. Full version: IACR Cryptology ePrint Archive, Report 2025/889. \url{https://eprint.iacr.org/2025/889}.
-\end{thebibliography}
-
 \clearpage
-\appendix
-\section{Polynomial coding}\label{app:polynomial}
+\section{Polynomial coding}\label{sec:polynomial}
 One 512-bit hash output gives 64 eight-bit pieces by splitting. Treating them as polynomial coefficients instead gives 256 possible evaluations. A signature exposes only a few of these correlated pieces. We add free finite-field arithmetic to the framework and keep the same oracle cost model.
 
 \subsection{One seed generates a column}
-For this annex, fix
+For this section, fix
 \[
  \lambda=128,\qquad \roinput=\rooutput=512,\qquad \keybudget=405,\qquad \sigbudget=16640.
 \]
@@ -546,4 +530,179 @@ Ordinary bit splitting & 373 & 53\\
 The chain instance uses 73 length-four and 18 length-five chains. The forest has 19 groups of four four-chain components, each group with its own root. The seed instances use 28 paired or 32 four-leaf components. Splitting uses ten $16\times16$ groups of 32-bit pieces, each authenticated by a four-ary tree. Their respective local reconstruction costs are $42,47,43,43,49$; the final root hashes cost $23,5,7,8,3$. All respect the common signature cap; the first five use 128-bit seeds.
 
 Polynomial coding beats these concrete retuned constructions. Its local information bound is optimal, but full ROM security remains conjectural and optimality over all graphs or codebooks is open.
+
+\clearpage
+\section{Lower bounds for whole-digest trees}\label{sec:tree-bounds}
+Restrict the framework to a fixed finite rooted tree $T$: every vertex holds $\lambda$ bits, the leaves are independent secrets, and each internal vertex hashes its ordered children and retains $\lambda$ output bits. Assume $\rooutput\ge\lambda$. A vertex with $d\ge1$ children costs $\lceil d\lambda/\roinput\rceil$ units. A disclosure is a \emph{cut}, meeting each leaf-to-root path exactly once; reconstruction hashes precisely the vertices strictly above the cut. There is no splitting or seed sharing.
+
+The signature budget allows at most
+\[
+ \digestbudget=\left\lfloor\frac{\sigbudget-\noncesize}{\lambda}\right\rfloor
+\]
+transmitted digests. Assume $\digestbudget\ge1$. As in the framework, all codebook cuts have a common positive cost $\reconstructcost$. The results below concern cuts and costs: their lower bounds apply to every secure tree codebook, while matching counts alone do not establish ROM security.
+
+\subsection{A verification lower bound}
+\begin{theorem}[Counting cuts by work and size]\label{thm:tree-verification}
+For every fixed tree and every codebook of distinct cuts,
+\[
+ \boxed{\displaystyle \disclosurecount\le\binom{\reconstructcost+\digestbudget-2}{\digestbudget-1}.}
+\]
+More precisely, if the root hash costs $C_{\mathrm{root}}\ge1$ units, then
+\[
+ \disclosurecount\le\binom{\reconstructcost-C_{\mathrm{root}}+\digestbudget-1}{\digestbudget-1}.
+\]
+Both bounds hold for arbitrary positive integer costs at internal vertices, independently of the tree's shape or key-generation budget.
+\end{theorem}
+\begin{proof}
+Encode a cut by traversing the tree from the root in the fixed child order. At a transmitted vertex, write $0$ and skip its descendants. At a recomputed vertex costing $c$ units, write $c$ copies of $1$, then visit its children. A cut with $f$ vertices gives exactly $\reconstructcost$ ones and $f$ zeros.
+
+The fixed tree makes this word uniquely decodable. At each pending vertex, $0$ means stop and $1$ means expand; its cost specifies how many ones to consume, and its ordered children specify the continuation. Decoding finishes exactly when no vertices remain pending. Thus no complete traversal word is a proper prefix of another.
+
+Append $\digestbudget-f$ zeros. Padding is injective: if two padded words agreed, one original word would be a prefix of the other. Every padded word begins with $C_{\mathrm{root}}$ ones, since the root is recomputed, and ends with $0$, since a traversal ends at a transmitted vertex. After fixing these bits, choose the remaining $\digestbudget-1$ zero positions among $\reconstructcost-C_{\mathrm{root}}+\digestbudget-1$ positions. This proves the refined bound; $C_{\mathrm{root}}\ge1$ gives the first bound.
+\end{proof}
+Consequently, reconstruction must reach the first integer cost for which the binomial coefficient is at least $\disclosurecount$. Add $\lceil(\messagesize+\noncesize)/\roinput\rceil$ units for message encoding to obtain a verification lower bound. Equal reconstruction cost is an assumption of the theorem; signature size may vary below its cap.
+
+\paragraph{Using the root arity.} Let $d_{\mathrm{root}}$ be the root's number of children and assume $\disclosurecount\ge2$. Then $\reconstructcost>C_{\mathrm{root}}$: sending all root children is the only cut of cost $C_{\mathrm{root}}$. In the proof's padded words, the $d_{\mathrm{root}}$ bits immediately after the initial ones cannot all be zero, since this would finish reconstruction at that smaller cost. Subtracting these forbidden words gives the stronger bound
+\begin{equation}\label{eq:root-arity-bound}
+ \disclosurecount\le\binom{\reconstructcost-C_{\mathrm{root}}+\digestbudget-1}{\digestbudget-1}-\binom{\reconstructcost-C_{\mathrm{root}}+\digestbudget-d_{\mathrm{root}}-1}{\digestbudget-d_{\mathrm{root}}-1}.
+\end{equation}
+Here a binomial coefficient with a negative lower argument is zero.
+
+\paragraph{Using the possible cut sizes.} Expanding a frontier vertex with $d$ children increases the frontier size by $d-1$. Thus, if every non-root internal arity is congruent to $1$ modulo a positive integer $g$, every positive-cost cut has size congruent to $d_{\mathrm{root}}$ modulo $g$. Replace $\digestbudget$ in the bounds by the largest integer at most $\digestbudget$ with that residue. Unary vertices impose no restriction on $g$. These refinements apply to arbitrary tree depths and key-generation budgets.
+
+\subsection{A stronger bound from the pending roots}\label{sec:pending-root-bound}
+The traversal bound forgets the shape of the subtrees still to be processed. Retaining just one distinction---whether a pending root is unary or branching---gives a stronger bound for arbitrary trees. For a fixed work cap, append sufficiently long unary chains to the leaves. Every original cut remains available, and the new leaves lie beyond all work and inspection considered below. Hence it suffices to distinguish unary from branching roots. Write $c(d)=\lceil d\lambda/\roinput\rceil$.
+
+Define $\mathsf V(w,h,u,b)$ for a forest with $u$ unary roots (one child) and $b$ branching roots (at least two children), remaining work $w$, and room for $u+b+h$ transmitted values. Thus $h$ is the number of spare fields. Sending a root leaves $h$ unchanged; expanding a root with $d$ children reduces $h$ by $d-1$. The branching arities and all deeper structure are arbitrary.
+
+\begin{theorem}[Pending-root bound]\label{thm:pending-root-bound}
+The following recurrence defines an upper bound on the number of cuts of every such forest. Any negative coordinate gives value zero. Otherwise, at $w=0$ the value is one, and an empty forest has value zero when $w>0$. For the other states, $\mathsf V(w,h,u,b)$ is the smaller of the applicable expressions
+\begin{align*}
+ \mathsf V_{\mathrm{unary}}&=\mathsf V(w,h,u-1,b)+\max\{\mathsf V(w-c(1),h,u,b),\mathsf V(w-c(1),h,u-1,b+1)\}, &&u>0,\\
+ \mathsf V_{\mathrm{branch}}&=\mathsf V(w,h,u,b-1)+\max_{\substack{2\le d\le h+1\\0\le k\le d}}\mathsf V(w-c(d),h-d+1,u+k,b-1+d-k), &&b>0.
+\end{align*}
+An empty maximum is zero. Consequently, every tree codebook satisfies
+\[
+ \disclosurecount\le\mathsf V_{\mathrm{tree}}(\reconstructcost,\digestbudget),\qquad \mathsf V_{\mathrm{tree}}(w,s):=\max_{\substack{1\le d\le s\\0\le u\le d}}\mathsf V(w-c(d),s-d,u,d-u).
+\]
+\end{theorem}
+\begin{proof}
+Process a unary root first. Either send it, or spend $c(1)$ units and replace it by its child, which is unary or branching. These cases give $\mathsf V_{\mathrm{unary}}$. Alternatively, process a branching root first. Either send it, or expand its $d$ children, of which some $k$ are unary; this gives $\mathsf V_{\mathrm{branch}}$. Both processing orders partition the same family of cuts, so its size is bounded by the smaller expression. Induction is well founded: expansion decreases work, and sending decreases the number of pending roots. Finally, a positive-work tree cut expands its root; maximize over its arity and its children's types. Its arity cannot exceed the field cap, since expansion never decreases frontier size.
+\end{proof}
+This is a finite calculation over counts of pending roots. For work cap $W$ and field cap $S$, memoization uses $O(WS^3)$ states and $O(WS^5)$ integer operations. It places no restriction on tree depth, arity, or key-generation work.
+
+\subsection{Retaining a small subtree prefix}\label{sec:prefix-bound}
+The pending-root bound remembers whether each root is unary or branching, but leaves its children unspecified. A stronger bound can retain one root's local shape while processing the other roots. The shape must then stay consistent throughout those counting steps.
+
+\paragraph{What we retain.} Write $U$ for a unary root and $B$ for a branching root. A prefix $L_{d,k}$ specifies a root with $d$ children: $k$ of type $U$ and $d-k$ of type $B$. A prefix $P_{d,k}$ adds one unary parent above $L_{d,k}$. All unspecified descendants remain arbitrary. Fix an inspection cutoff $\Delta\ge2$ and define
+\[
+ \mathcal I_\Delta=\{(d,k):1\le d\le\Delta,\ 0\le k\le d\}\cup\{\star\},\qquad \mathcal I_\Delta^{B}=\mathcal I_\Delta\setminus\{(1,0),(1,1)\}.
+\]
+The symbol $\star$ covers every root arity greater than $\Delta$: $L_\star$ is such a root, and $P_\star$ is its unary parent. Thus $\mathcal I_\Delta$ covers every possible child of a unary root, and $\mathcal I_\Delta^B$ covers every branching root. The cutoff places no restriction on the tree.
+
+Let $\mathsf R(w,h,u,b)$ bound the number of cuts of an ordinary forest with $u$ unary roots, $b$ branching roots, exact work $w$, and at most $u+b+h$ transmitted digests. Let $\mathsf L_i(w,h,u,b)$ and $\mathsf P_i(w,h,u,b)$ bound the same ordinary roots together with \emph{one additional root} having the indicated prefix. Their field cap is $u+b+1+h$. A prefix records only local shape; it does not fix any hash values.
+
+\paragraph{Counting rules.} Sending a root and expanding it are disjoint cases, so their bounds add. Different choices of which root to process bound the same cuts, so we take their minimum. When a root's shape is unknown, we take the maximum over all possibilities.
+
+Let $\mathcal E[F](w,h,u,b)$ denote the minimum of the applicable unary and branching expressions in Theorem~\ref{thm:pending-root-bound}, replacing $\mathsf V$ by $F$. It processes one ordinary root and keeps the additional prefix unchanged. Set $\mathcal E[F]=+\infty$ when $u=b=0$, since no such root can be processed.
+
+\paragraph{Recurrences.} All bounds are zero if any coordinate is negative. Otherwise, at work zero they equal one: send every pending root. An empty ordinary forest has bound zero at positive work. For the remaining states and $i=(d,k)$, define
+\begin{align*}
+ \mathsf L_{d,k}(w,h,u,b)&=\min\bigl\{\mathsf V(w,h,u+\mathbf1_{d=1},b+\mathbf1_{d>1}),\ \mathcal E[\mathsf L_{d,k}](w,h,u,b),\\[-2pt]
+ &\hspace{38mm}\mathsf R(w,h,u,b)+\mathsf R(w-c(d),h-d+1,u+k,b+d-k)\bigr\},\\
+ \mathsf P_{d,k}(w,h,u,b)&=\min\bigl\{\mathsf V(w,h,u+1,b),\ \mathcal E[\mathsf P_{d,k}](w,h,u,b),\\[-2pt]
+ &\hspace{38mm}\mathsf R(w,h,u,b)+\mathsf L_{d,k}(w-c(1),h,u,b)\bigr\}.
+\end{align*}
+The three entries respectively forget the prefix, process another root, or partition cuts according to whether they send or expand the prefix root. The larger-arity cases need only the following bounds:
+\begin{align*}
+ \mathsf L_\star(w,h,u,b)&=\mathsf R(w,h,u,b)+\max_{\substack{\Delta<d\le h+1\\0\le k\le d}}\mathsf R(w-c(d),h-d+1,u+k,b+d-k),\\
+ \mathsf P_\star(w,h,u,b)&=\min\bigl\{\mathsf L_{1,0}(w,h,u,b),\ \mathsf R(w,h,u,b)+\mathsf L_\star(w-c(1),h,u,b)\bigr\}.
+\end{align*}
+An empty maximum is zero. Finally, inspecting one ordinary root gives $\mathsf R(w,h,u,b)$ as the minimum of $\mathsf V(w,h,u,b)$ and the applicable expressions
+\begin{align*}
+ &\max_{k\in\{0,1\}}\mathsf L_{1,k}(w,h,u-1,b), &&u>0 \quad\text{(inspect a unary root's child type)},\\
+ &\max_{i\in\mathcal I_\Delta}\mathsf P_i(w,h,u-1,b), &&u>0 \quad\text{(inspect its child's prefix)},\\
+ &\max_{i\in\mathcal I_\Delta^B}\mathsf L_i(w,h,u,b-1), &&b>0 \quad\text{(inspect a branching root's prefix)}.
+\end{align*}
+
+\begin{theorem}[Prefix bound]\label{thm:prefix-bound}
+These recurrences are well defined and bound the number of cuts of every forest of the indicated type. Consequently, every positive-work tree codebook satisfies
+\[
+ \disclosurecount\le\mathsf R_{\mathrm{tree}}(\reconstructcost,\digestbudget),\qquad \mathsf R_{\mathrm{tree}}(w,s):=\max_{\substack{1\le d\le s\\0\le u\le d}}\mathsf R(w-c(d),s-d,u,d-u).
+\]
+\end{theorem}
+\begin{proof}
+Induct lexicographically on remaining work and total pending-root count. At each pair, compute $\mathsf L$, then $\mathsf P$, then $\mathsf R$; the bound $\mathsf V$ is already known. Sending a root reduces the pending-root count by one; expanding it reduces work by its positive cost. Thus all recursive calls in $\mathsf L$ use earlier pairs. The same holds for $\mathsf P$, apart from its already computed $\mathsf L_{1,0}$ bound. Finally, $\mathsf R$ inspects prefixes at the current pair. This order is well founded, and the base cases are immediate.
+
+Fix any forest matching a prefix state. Forgetting the prefix gives the stated $\mathsf V$ bound. Processing an ordinary root gives $\mathcal E$ by Theorem~\ref{thm:pending-root-bound}, with the prefix preserved. If instead we process the prefix root, sending it leaves precisely the ordinary forest. Expanding $L_{d,k}$ costs $c(d)$, exposes $k$ unary and $d-k$ branching roots, and consumes $d-1$ spare fields. Expanding $P_{d,k}$ costs $c(1)$ and leaves $L_{d,k}$ as the additional root. These partitions give the sums in the recurrences. Maximizing over $d>\Delta$ proves the bound for $L_\star$; an arity too large to expand contributes only the sending case. The same partition bounds $P_\star$. This prefix also has type $L_{1,0}$, since its sole child is branching. Each entry of every minimum is therefore an upper bound for the same fixed forest.
+
+For an ordinary forest, choose a root of an available type. Its actual shape occurs in each applicable inspection maximum: the sets include both the explicitly recorded arities and all larger ones. The corresponding maximum bounds this forest, so their minimum with $\mathsf V$ does too. This completes the induction. Finally, every positive-work tree cut expands the public root. If its arity is $d$, its children form a forest with work $w-c(d)$ and $s-d$ spare fields. Since expansion never decreases frontier size, $d\le s$; maximizing over its arity and child types proves the tree bound.
+\end{proof}
+For work cap $W$ and field cap $S$, there are $O(\Delta^2WS^3)$ states and $O(\Delta^2WS^5)$ integer operations. This calculation applies to arbitrary tree depth and arity, independently of key-generation work.
+
+\subsection{When chains attain the bound}
+Assume $\roinput\ge\lambda$, so each chain step costs one unit, and $\digestbudget,\disclosurecount\ge2$. Define $N_{\mathrm{steps}}$ as the least nonnegative integer satisfying
+\[
+ \binom{N_{\mathrm{steps}}+\digestbudget-1}{\digestbudget-1}\ge\disclosurecount,\qquad C_{\mathrm{join}}=\left\lceil\frac{\lambda\digestbudget}{\roinput}\right\rceil.
+\]
+Here $C_{\mathrm{join}}$ is the cost of hashing $\digestbudget$ chain endpoints into the public root.
+
+\begin{corollary}[Optimal chains when the endpoints fit]\label{cor:optimal-chains}
+If $\keybudget\ge\digestbudget N_{\mathrm{steps}}+C_{\mathrm{join}}$, the minimum reconstruction cost among tree codebooks meeting the count, size, and key-generation constraints satisfies
+\[
+ N_{\mathrm{steps}}+1\le C_{\mathrm{reconstruct}}^{\mathrm{opt}}\le N_{\mathrm{steps}}+C_{\mathrm{join}}.
+\]
+In particular, if $\lambda\digestbudget\le\roinput$, top-of-the-hypercube chains are optimal for this counting problem. In general they are within $C_{\mathrm{join}}-1$ units of the lower bound under the stated key-generation condition.
+\end{corollary}
+\begin{proof}
+The lower bound follows from Theorem~\ref{thm:tree-verification} and the minimality of $N_{\mathrm{steps}}$. For the upper bound, join $\digestbudget$ chains of length $N_{\mathrm{steps}}$ at one root. Choose nonnegative remaining distances whose sum is $N_{\mathrm{steps}}$. There are $\binom{N_{\mathrm{steps}}+\digestbudget-1}{\digestbudget-1}$ choices, and each distance fits its chain. These cuts are incomparable: forward hashing can only decrease remaining distances. Each sends $\digestbudget$ digests and costs $N_{\mathrm{steps}}+C_{\mathrm{join}}$. Key generation costs $\digestbudget N_{\mathrm{steps}}+C_{\mathrm{join}}$. Keep any $\disclosurecount$ choices.
+\end{proof}
+With the root cost fixed to $C_{\mathrm{join}}$, the refined bound proves these chains optimal even when $C_{\mathrm{join}}>1$. Under the corollary's key-generation condition, any better tree must have a smaller root cost.
+
+\subsection{A complementary key-generation bound}
+\begin{proposition}[Total number of cuts]
+If $\roinput=4\lambda$, a whole-digest tree $T$ has at most $1+2^{4C_{\mathrm{keygen}}(T)/5}$ cuts, without restrictions on their sizes or reconstruction costs.
+\end{proposition}
+\begin{proof}
+Let $F(T)$ count cuts. A source has $F=1$. If the root has $d$ children $T_i$, then $F(T)=1+\prod_i F(T_i)$ and $C_{\mathrm{keygen}}(T)=\lceil d/4\rceil+\sum_i C_{\mathrm{keygen}}(T_i)$. Prove the auxiliary bound $F(T)\le2^{(4C_{\mathrm{keygen}}(T)+1)/5}$ by induction. At costs $0,1,2,3$, the maximum cut counts are $1,2,3,5$, which satisfy it. Applying the auxiliary bound to the children gives
+\[
+ F(T)\le1+2^{(4\sum_i C_{\mathrm{keygen}}(T_i)+d)/5}\le1+2^{4C_{\mathrm{keygen}}(T)/5}.
+\]
+For $C_{\mathrm{keygen}}(T)\ge4$, this also implies the auxiliary bound and closes the induction. The small cases satisfy the stated bound directly.
+\end{proof}
+When $C_{\mathrm{keygen}}$ is a positive multiple of five, the bound is attained by $4C_{\mathrm{keygen}}/5$ one-step chains joined by a root hash costing $C_{\mathrm{keygen}}/5$ units. Unlike Theorem~\ref{thm:tree-verification}, this bound counts all cuts together.
+
+\subsection{Example: a five-unit gap}
+Take $\lambda=128$, $\roinput=512$, $\rooutput=256$, $\messagesize=\noncesize=256$, $\sigbudget=5504$ bits, and $\keybudget=1467$. Retain 128 bits at every tree vertex. With $\encbits=128$ and $\disclosurecount=2^{115}$, encoding uses 13 grinding bits, takes at most $8192$ expected signing queries for an independently fixed message, and costs one verification unit. The signature has room for $\digestbudget=41$ digests. Since
+\[
+ \binom{96+41-2}{40}=\binom{135}{40}<2^{115}\le\binom{136}{40},
+\]
+Theorem~\ref{thm:tree-verification} gives $C_{\mathrm{verif}}\ge97+C_{\mathrm{root}}\ge98$, even with unlimited key generation. The pending-root bound excludes reconstruction cost 97 as well: exact integer evaluation of the recurrence gives
+\[
+ \mathsf V_{\mathrm{tree}}(97,41)=34849200901243949845681993506549562<2^{115}.
+\]
+Retaining prefixes with $\Delta=4$ excludes reconstruction cost 98 too:
+\[
+ \mathsf R_{\mathrm{tree}}(98,41)=40928772293499251517484856818508787<2^{115}.
+\]
+Thus every whole-digest tree needs at least $99+1=100$ verification units. These conclusions use the proved recurrences and exact integer evaluation, without assuming a particular tree shape. Two independent implementations agree on the latter value; the largest bound occurs at root arity four.
+
+\paragraph{A 105-unit tree.} Let $T_0$ be a chain of length 15, $T_1$ a hash of four independent copies of $T_0$, and $T_2$ a hash of four independent copies of $T_1$. Hash eight component roots into the public key: two copies of $T_2$, four of $T_1$, and two of $T_0$. Thus the tree mixes three depths. It has 50 chains, 14 four-input hashes, and one eight-input root hash, giving
+\[
+ C_{\mathrm{keygen}}=50\cdot15+14+2=766\le1467.
+\]
+For exact counting, let $x$ record reconstruction units and $y$ transmitted digests. Sending a subtree root contributes $y$; reconstructing it contributes its hash cost and its children's choices. Hence
+\[
+ P_0=y(1+x+\cdots+x^{15}),\qquad P_1=y+xP_0^4,\qquad P_2=y+xP_1^4,\qquad P_T=y+x^2P_2^2P_1^4P_0^2.
+\]
+The number of cuts with cost 104 and at most 41 digests is exactly
+\[
+ \sum_{f=1}^{41}[x^{104}y^f]P_T=41564535341997318397289575887304567>2^{115}.
+\]
+Keep the first $2^{115}$ cuts. They are incomparable because forward hashing strictly decreases reconstruction cost. Signatures have at most $256+41\cdot128=5504$ bits, and verification costs $104+1=105$ units. Thus the optimum for the whole-digest-tree counting problem lies in $[100,105]$ under these budgets. The lower bound applies to every secure tree codebook; the construction's ROM security remains conjectural.
+
+\begin{thebibliography}{KKW25}
+\bibitem[BM94]{BM94} Daniel Bleichenbacher and Ueli~M. Maurer. Directed acyclic graphs, one-way functions and digital signatures. In Yvo Desmedt, editor, \emph{Advances in Cryptology---CRYPTO '94}, volume 839 of \emph{LNCS}, pages 75--82. Springer, 1994. \url{https://crypto.ethz.ch/publications/files/BleMau94.pdf}.
+\bibitem[KKW25]{hypercube} Dmitry Khovratovich, Mikhail Kudinov, and Benedikt Wagner. At the top of the hypercube---better size-time tradeoffs for hash-based signatures. In \emph{Advances in Cryptology---CRYPTO 2025, Part VI}, volume 16005 of \emph{LNCS}, pages 93--123. Springer, 2025. Full version: IACR Cryptology ePrint Archive, Report 2025/889. \url{https://eprint.iacr.org/2025/889}.
+\end{thebibliography}
 \end{document}
